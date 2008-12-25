@@ -1,0 +1,25 @@
+---
+abstract: 'a simple wrapper around Log::Dispatch'
+author:
+  - 'Ricardo SIGNES, C<< <rjbs@cpan.org> >>'
+distribution_type: module
+generated_by: 'Module::Install version 0.77'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+module_name: Log::Dispatchouli
+name: Log-Dispatchouli
+no_index:
+  directory:
+    - inc
+    - t
+requires:
+  Carp: 0
+  Log::Dispatch: 0
+  Params::Util: 0
+  Scalar::Util: 0
+  String::Flogger: 0
+resources:
+  license: http://dev.perl.org/licenses/
+version: 1.000
