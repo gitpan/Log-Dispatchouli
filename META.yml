@@ -17,9 +17,14 @@ no_index:
 requires:
   Carp: 0
   Log::Dispatch: 0
+  Log::Dispatch::Array: 0
+  Log::Dispatch::File: 0
+  Log::Dispatch::Screen: 0
+  Log::Dispatch::Syslog: 0
   Params::Util: 0
   Scalar::Util: 0
   String::Flogger: 0
+  Sys::Syslog: 0.16
 resources:
   license: http://dev.perl.org/licenses/
-version: 1.001
+version: 1.002
