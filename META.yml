@@ -27,4 +27,4 @@ requires:
   Sys::Syslog: 0.16
 resources:
   license: http://dev.perl.org/licenses/
-version: 1.002
+version: 1.003

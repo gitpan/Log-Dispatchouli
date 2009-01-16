@@ -1,3 +1,4 @@
+Changes
 inc/Module/Install.pm
 inc/Module/Install/AutoManifest.pm
 inc/Module/Install/Base.pm
