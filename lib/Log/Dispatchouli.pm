@@ -10,11 +10,12 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 use Carp ();
 use Log::Dispatch;
-use Params::Util qw(_ARRAYLIKE);
+use Params::Util qw(_ARRAYLIKE _HASHLIKE);
 use Scalar::Util qw(blessed weaken);
 use String::Flogger;
+use Try::Tiny 0.04;
 
-our $VERSION = '1.003';
+our $VERSION = '1.004';
 
 =head1 METHODS
 
@@ -33,6 +34,7 @@ Valid arguments are:
   to_stdout  - log to STDOUT; default: false
   to_stderr  - log to STDERR; default: false
   facility   - to which syslog facility to send logs; default: none
+  log_pid    - if true, prefix all log entries with the pid; default: true
   fail_fatal - a boolean; if true, failure to log is fatal; default: true
   debug      - a boolean; if true, log_debug method is not a no-op
                defaults to the truth of the DISPATCHOULI_DEBUG env var
@@ -49,6 +51,8 @@ sub new {
   my $ident = $arg->{ident}
     or Carp::croak "no ident specified when using $class";
 
+  my $pid_prefix = exists $arg->{log_pid} ? $arg->{log_pid} : 1;
+
   my $self = bless {} => $class;
 
   # We make a weak copy so that the object can contain a coderef that
@@ -61,7 +65,7 @@ sub new {
     callbacks => sub {
       my $prefix = $copy->get_prefix || '';
       length($prefix) && ($prefix = "$prefix: ");
-      return "[$$] $prefix" . {@_}->{message}
+      return( ($pid_prefix ? "[$$] " : '') . $prefix . {@_}->{message})
     },
   );
 
@@ -172,42 +176,44 @@ sub new_tester {
 
 =head2 log
 
-  $logger->log($message);
+  $logger->log(@messages);
 
-This method uses L<String::Flogger|String::Flogger> on the input, then logs the
-result.
+  $logger->log(\%arg, @messages);
+
+This method uses L<String::Flogger> on the input, then logs the result.  Each
+message is flogged individually, then joined with spaces.
+
+If the first argument is a hashref, it will be used as extra arguments to
+logging.  At present, all entries in the hashref are ignored.
 
 =cut
 
+sub _join { shift; join q{ }, @{ $_[0] } }
+
 sub _log_at {
-  my ($self, $level, $message, $arg) = @_;
+  my ($self, $arg, @rest) = @_;
+  shift @rest if _HASHLIKE($rest[0]); # for future expansion
 
-  {
-    local $@;
-    my $ok = eval {
-      $message = String::Flogger->flog($message);
+  my $message;
+  try {
+    my @flogged = map {; String::Flogger->flog($_) } @rest;
+    $message    = @flogged > 1 ? $self->_join(\@flogged) : $flogged[0];
 
-      $self->dispatcher->log(
-        level   => $level,
-        message => $message,
-      );
+    $self->dispatcher->log(
+      level   => $arg->{level},
+      message => $message,
+    );
+  } catch {
+    $message = '(no message could be logged)' unless defined $message;
+    die $_ if $self->{fail_fatal};
+  };
 
-      1;
-    };
+  die $message if $arg->{fatal};
 
-    die if ! $ok and $self->{fail_fatal};
-  }
-
-  $message = "log_fatal && ! fail_fatal; failed to log"
-    unless defined $message;
-
-  die $message if $arg and $arg->{fatal};
+  return;
 }
 
-sub log {
-  my ($self, $message) = @_;
-  $self->_log_at(info => $message);
-}
+sub log { shift()->_log_at({ level => 'info' }, @_); }
 
 =head2 log_fatal
 
@@ -216,10 +222,7 @@ exception after logging.
 
 =cut
 
-sub log_fatal {
-  my ($self, $message) = @_;
-  $self->_log_at(info => $message, { fatal => 1 });
-}
+sub log_fatal { shift()->_log_at({ level => 'info', fatal => 1 }, @_); }
 
 =head2 log_debug
 
@@ -229,9 +232,8 @@ the SvcLogger object has its debug property set to true.
 =cut
 
 sub log_debug {
-  my ($self, $message) = @_;
-  return unless $self->debug;
-  $self->_log_at(debug => $message);
+  return unless $_[0]->debug;
+  shift()->_log_at({ level => 'debug' }, @_);
 }
 
 =head2 debug
