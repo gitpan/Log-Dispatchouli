@@ -29,7 +29,7 @@ requires:
   Scalar::Util: 0
   String::Flogger: 0
   Sys::Syslog: 0.16
-  Try::Tiny: 0
+  Try::Tiny: 0.04
 resources:
   license: http://dev.perl.org/licenses/
-version: 1.004
+version: 1.005
