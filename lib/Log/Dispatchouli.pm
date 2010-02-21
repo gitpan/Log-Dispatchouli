@@ -15,7 +15,7 @@ use Scalar::Util qw(blessed weaken);
 use String::Flogger;
 use Try::Tiny 0.04;
 
-our $VERSION = '1.005';
+our $VERSION = '1.006';
 
 =head1 METHODS
 
@@ -55,17 +55,9 @@ sub new {
 
   my $self = bless {} => $class;
 
-  # We make a weak copy so that the object can contain a coderef that
-  # references the object without interfering with garbage collection. -- rjbs,
-  # 2007-08-08
-  my $copy = $self;
-  weaken $copy;
-
   my $log = Log::Dispatch->new(
     callbacks => sub {
-      my $prefix = $copy->get_prefix || '';
-      length($prefix) && ($prefix = "$prefix: ");
-      return( ($pid_prefix ? "[$$] " : '') . $prefix . {@_}->{message})
+      return( ($pid_prefix ? "[$$] " : '') . {@_}->{message})
     },
   );
 
@@ -186,6 +178,10 @@ message is flogged individually, then joined with spaces.
 If the first argument is a hashref, it will be used as extra arguments to
 logging.  At present, all entries in the hashref are ignored.
 
+This method can also be called as C<log_info>, to match other popular logging
+interfaces.  B<If you want to override this method, you must override C<log>
+and not C<log_info>>.
+
 =cut
 
 sub _join { shift; join q{ }, @{ $_[0] } }
@@ -193,6 +189,10 @@ sub _join { shift; join q{ }, @{ $_[0] } }
 sub _log_at {
   my ($self, $arg, @rest) = @_;
   shift @rest if _HASHLIKE($rest[0]); # for future expansion
+
+  if (defined (my $prefix = $self->get_prefix)) {
+    unshift @rest, "$prefix:";
+  }
 
   my $message;
   try {
@@ -213,7 +213,8 @@ sub _log_at {
   return;
 }
 
-sub log { shift()->_log_at({ level => 'info' }, @_); }
+sub log      { shift()->_log_at({ level => 'info' }, @_); }
+sub log_info { shift()->log(@_); }
 
 =head2 log_fatal
 
@@ -222,7 +223,7 @@ exception after logging.
 
 =cut
 
-sub log_fatal { shift()->_log_at({ level => 'info', fatal => 1 }, @_); }
+sub log_fatal { shift()->_log_at({ level => 'error', fatal => 1 }, @_); }
 
 =head2 log_debug
 
@@ -241,6 +242,9 @@ sub log_debug {
 This gets or sets the SvcLogger's debug property, which affects the behavior of
 C<log_debug>.
 
+C<is_debug> also exists as a read-only accessor.  Much less usefully,
+C<is_info> and C<is_fatal> exist, both of which always return true.
+
 =cut
 
 sub debug {
@@ -248,6 +252,11 @@ sub debug {
   $self->{debug} = $_[0] if @_;
   return $self->{debug};
 }
+
+sub is_debug { return $_[0]->{debug} }
+
+sub is_info  { 1 }
+sub is_fatal { 1 }
 
 =head2 dispatcher
 
@@ -258,7 +267,11 @@ you're looking for.  Move along.
 
 sub dispatcher   { $_[0]->{dispatcher} }
 
-sub get_prefix   { $_[0]->{prefix} }
+sub get_prefix   {
+  return $_[0]->{prefix} if defined $_[0]->{prefix};
+  return;
+}
+
 sub set_prefix   { $_[0]->{prefix} = $_[1] }
 sub unset_prefix { undef $_[0]->{prefix} }
 
