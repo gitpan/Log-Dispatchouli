@@ -1,19 +1,51 @@
-use inc::Module::Install;
 
-all_from('lib/Log/Dispatchouli.pm');
+use strict;
+use warnings;
 
-requires('Carp');
-requires('Log::Dispatch');
-requires('Log::Dispatch::Array');
-requires('Log::Dispatch::File');
-requires('Log::Dispatch::Screen');
-requires('Log::Dispatch::Syslog');
-requires('Params::Util');
-requires('Scalar::Util');
-requires('String::Flogger');
-requires('Sys::Syslog' => 0.16); # native socket type
-requires('Try::Tiny' => 0.04);
 
-auto_manifest;
 
-WriteAll();
+use ExtUtils::MakeMaker 6.11;
+
+
+
+my %WriteMakefileArgs = (
+                       'test' => {
+                                   'TESTS' => 't/*.t'
+                                 },
+                       'NAME' => 'Log::Dispatchouli',
+                       'DISTNAME' => 'Log-Dispatchouli',
+                       'CONFIGURE_REQUIRES' => {
+                                                 'ExtUtils::MakeMaker' => '6.11'
+                                               },
+                       'AUTHOR' => 'Ricardo SIGNES <rjbs@cpan.org>',
+                       'BUILD_REQUIRES' => {},
+                       'ABSTRACT' => 'a simple wrapper around Log::Dispatch',
+                       'EXE_FILES' => [],
+                       'VERSION' => '1.100630',
+                       'PREREQ_PM' => {
+                                        'Try::Tiny' => '0.04',
+                                        'Scalar::Util' => 0,
+                                        'Log::Dispatch::Array' => 0,
+                                        'overload' => 0,
+                                        'Sys::Syslog' => '0.16',
+                                        'Carp' => 0,
+                                        'Test::More' => '0.88',
+                                        'Log::Dispatch::File' => 0,
+                                        'Params::Util' => 0,
+                                        'Log::Dispatch::Screen' => 0,
+                                        'Log::Dispatch' => 0,
+                                        'Log::Dispatch::Syslog' => 0,
+                                        'Test::Deep' => 0,
+                                        'String::Flogger' => 0
+                                      },
+                       'LICENSE' => 'perl'
+                     );
+
+
+delete $WriteMakefileArgs{LICENSE}
+  unless eval { ExtUtils::MakeMaker->VERSION(6.31) };
+
+WriteMakefile(%WriteMakefileArgs);
+
+
+

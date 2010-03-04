@@ -1,23 +1,16 @@
 ---
 abstract: 'a simple wrapper around Log::Dispatch'
 author:
-  - 'Ricardo SIGNES, C<< <rjbs@cpan.org> >>'
-build_requires:
-  ExtUtils::MakeMaker: 6.42
+  - 'Ricardo SIGNES <rjbs@cpan.org>'
+build_requires: {}
 configure_requires:
-  ExtUtils::MakeMaker: 6.42
-distribution_type: module
-generated_by: 'Module::Install version 0.92'
+  ExtUtils::MakeMaker: 6.11
+generated_by: 'Dist::Zilla version 1.100630'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
-module_name: Log::Dispatchouli
 name: Log-Dispatchouli
-no_index:
-  directory:
-    - inc
-    - t
 requires:
   Carp: 0
   Log::Dispatch: 0
@@ -29,7 +22,10 @@ requires:
   Scalar::Util: 0
   String::Flogger: 0
   Sys::Syslog: 0.16
+  Test::Deep: 0
+  Test::More: 0.88
   Try::Tiny: 0.04
+  overload: 0
 resources:
-  license: http://dev.perl.org/licenses/
-version: 1.008
+  repository: git://git.codesimply.com/Log-Dispatchouli.git
+version: 1.100630

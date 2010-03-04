@@ -1,12 +1,8 @@
 use strict;
 use warnings;
 package Log::Dispatchouli;
-
-=head1 NAME
-
-Log::Dispatchouli - a simple wrapper around Log::Dispatch
-
-=cut
+our $VERSION = '1.100630';
+# ABSTRACT: a simple wrapper around Log::Dispatch
 
 use Carp ();
 use Log::Dispatch;
@@ -15,35 +11,6 @@ use Scalar::Util qw(blessed weaken);
 use String::Flogger;
 use Try::Tiny 0.04;
 
-our $VERSION = '1.008';
-
-=head1 METHODS
-
-=head2 new
-
-  my $logger = Log::Dispatchouli->new(\%arg);
-
-This returns a new SvcLogger, which can then be called like a coderef to log
-stuff.  You know.  Stuff.  Things, too, we'll log those.
-
-Valid arguments are:
-
-  ident      - the name of the thing logging (mandatory)
-  to_self    - log to the logger object for testing; default: false
-  to_file    - log to PROGRAM_NAME.YYYYMMDD in the log path; default: false
-  to_stdout  - log to STDOUT; default: false
-  to_stderr  - log to STDERR; default: false
-  facility   - to which syslog facility to send logs; default: none
-  log_pid    - if true, prefix all log entries with the pid; default: true
-  fail_fatal - a boolean; if true, failure to log is fatal; default: true
-  debug      - a boolean; if true, log_debug method is not a no-op
-               defaults to the truth of the DISPATCHOULI_DEBUG env var
-
-The log path is either F</tmp> or the value of the F<DISPATCHOULI_PATH> env var.
-
-If the F<DISPATCHOULI_NOSYSLOG> env var is true, we don't log to syslog.
-
-=cut
 
 sub new {
   my ($class, $arg) = @_;
@@ -145,12 +112,6 @@ sub new {
   return $self;
 }
 
-=head2 new_tester
-
-This returns a new logger that doesn't log.  It's useful in testing.  If no
-C<ident> arg is provided, one will be generated.
-
-=cut
 
 sub new_tester {
   my ($class, $arg) = @_;
@@ -166,23 +127,6 @@ sub new_tester {
   });
 }
 
-=head2 log
-
-  $logger->log(@messages);
-
-  $logger->log(\%arg, @messages);
-
-This method uses L<String::Flogger> on the input, then logs the result.  Each
-message is flogged individually, then joined with spaces.
-
-If the first argument is a hashref, it will be used as extra arguments to
-logging.  At present, all entries in the hashref are ignored.
-
-This method can also be called as C<info>, to match other popular logging
-interfaces.  B<If you want to override this method, you must override C<log>
-and not C<info>>.
-
-=cut
 
 sub _join { shift; join q{ }, @{ $_[0] } }
 
@@ -216,30 +160,10 @@ sub _log_at {
 sub log  { shift()->_log_at({ level => 'info' }, @_); }
 sub info { shift()->log(@_); }
 
-=head2 log_fatal
-
-This behaves like the C<log> method, but will throw the logged string as an
-exception after logging.
-
-This method can also be called as C<fatal>, to match other popular logging
-interfaces.  B<If you want to override this method, you must override
-C<log_fatal> and not C<fatal>>.
-
-=cut
 
 sub log_fatal { shift()->_log_at({ level => 'error', fatal => 1 }, @_); }
 sub fatal     { shift()->log_fatal(@_); }
 
-=head2 log_debug
-
-This behaves like the C<log> method, but will only log (at the debug level) if
-the SvcLogger object has its debug property set to true.
-
-This method can also be called as C<debug>, to match other popular logging
-interfaces.  B<If you want to override this method, you must override
-C<log_debug> and not C<debug>>.
-
-=cut
 
 sub log_debug {
   return unless $_[0]->is_debug;
@@ -248,37 +172,17 @@ sub log_debug {
 
 sub debug { shift()->log_debug(@_); }
 
-=head2 set_debug
-
-  $logger->set_debug($bool);
-
-This sets the SvcLogger's debug property, which affects the behavior of
-C<log_debug>.
-
-=cut
 
 sub set_debug {
   return($_[0]->{debug} = ! ! $_[1]);
 }
 
-=head2 is_debug
-
-C<is_debug> also exists as a read-only accessor.  Much less usefully,
-C<is_info> and C<is_fatal> exist, both of which always return true.
-
-=cut
 
 sub is_debug { return $_[0]->{debug} }
 
 sub is_info  { 1 }
 sub is_fatal { 1 }
 
-=head2 dispatcher
-
-This returns the underlying Log::Dispatch object.  This is not the method
-you're looking for.  Move along.
-
-=cut
 
 sub dispatcher   { $_[0]->{dispatcher} }
 
@@ -290,12 +194,6 @@ sub get_prefix   {
 sub set_prefix   { $_[0]->{prefix} = $_[1] }
 sub unset_prefix { undef $_[0]->{prefix} }
 
-=head2 events
-
-This method returns the arrayref of events logged to an array in memory (in the
-logger).  If the logger is not logging C<to_self> this raises an exception.
-
-=cut
 
 sub events {
   Carp::confess "->events called on a logger not logging to self"
@@ -310,6 +208,139 @@ use overload
 ;
 
 
+1;
+
+__END__
+=pod
+
+=head1 NAME
+
+Log::Dispatchouli - a simple wrapper around Log::Dispatch
+
+=head1 VERSION
+
+version 1.100630
+
+=head1 SYNOPSIS
+
+  my $logger = Log::Dispatchouli->new({
+    ident     => 'stuff-purger',
+    facility  => 'daemon',
+    to_stdout => $opt->{print},
+    debug     => $opt->{verbose}
+  })
+
+  $logger->log([ "There are %s items left to purge...", $stuff_left ]);
+
+  $logger->log_debug("this is extra often-ignored debugging log");
+
+  $logger->log_fatal("Now we will die!!");
+
+=head1 DESCRIPTION
+
+Log::Dispatchouli is a thin layer above L<Log::Dispatch> and meant to make it
+dead simple to add logging to a program without having to think much about
+categories, facilities, levels, or things like that.  It is meant to make
+logging just configurable enough that you can find the logs you want and just
+easy enough that you will actually log things.
+
+Log::Dispatchouli can log to syslog (if you specify a facility), standard error
+or standard output, to a file, or to an array in memory.  That last one is
+mostly useful for testing.
+
+In addition to providing as simple a way to get a handle for logging
+operations, Log::Dispatchouli uses L<String::Flogger> to process the things to
+be logged, meaning you can easily log data structures.  Basically: strings are
+logged as is, arrayrefs are taken as (sprintf format, args), and subroutines
+are called only if needed.  For more information read the L<String::Flogger>
+docs.
+
+=head1 METHODS
+
+=head2 new
+
+  my $logger = Log::Dispatchouli->new(\%arg);
+
+This returns a new logger, a Log::Dispatchouli object.
+
+Valid arguments are:
+
+  ident      - the name of the thing logging (mandatory)
+  to_self    - log to the logger object for testing; default: false
+  to_file    - log to PROGRAM_NAME.YYYYMMDD in the log path; default: false
+  to_stdout  - log to STDOUT; default: false
+  to_stderr  - log to STDERR; default: false
+  facility   - to which syslog facility to send logs; default: none
+  log_pid    - if true, prefix all log entries with the pid; default: true
+  fail_fatal - a boolean; if true, failure to log is fatal; default: true
+  debug      - a boolean; if true, log_debug method is not a no-op
+               defaults to the truth of the DISPATCHOULI_DEBUG env var
+
+The log path is either F</tmp> or the value of the F<DISPATCHOULI_PATH> env var.
+
+If the F<DISPATCHOULI_NOSYSLOG> env var is true, we don't log to syslog.
+
+=head2 new_tester
+
+This returns a new logger that doesn't log.  It's useful in testing.  If no
+C<ident> arg is provided, one will be generated.
+
+=head2 log
+
+  $logger->log(@messages);
+
+  $logger->log(\%arg, @messages);
+
+This method uses L<String::Flogger> on the input, then logs the result.  Each
+message is flogged individually, then joined with spaces.
+
+If the first argument is a hashref, it will be used as extra arguments to
+logging.  At present, all entries in the hashref are ignored.
+
+This method can also be called as C<info>, to match other popular logging
+interfaces.  B<If you want to override this method, you must override C<log>
+and not C<info>>.
+
+=head2 log_fatal
+
+This behaves like the C<log> method, but will throw the logged string as an
+exception after logging.
+
+This method can also be called as C<fatal>, to match other popular logging
+interfaces.  B<If you want to override this method, you must override
+C<log_fatal> and not C<fatal>>.
+
+=head2 log_debug
+
+This behaves like the C<log> method, but will only log (at the debug level) if
+the logger object has its debug property set to true.
+
+This method can also be called as C<debug>, to match other popular logging
+interfaces.  B<If you want to override this method, you must override
+C<log_debug> and not C<debug>>.
+
+=head2 set_debug
+
+  $logger->set_debug($bool);
+
+This sets the logger's debug property, which affects the behavior of
+C<log_debug>.
+
+=head2 is_debug
+
+C<is_debug> also exists as a read-only accessor.  Much less usefully,
+C<is_info> and C<is_fatal> exist, both of which always return true.
+
+=head2 dispatcher
+
+This returns the underlying Log::Dispatch object.  This is not the method
+you're looking for.  Move along.
+
+=head2 events
+
+This method returns the arrayref of events logged to an array in memory (in the
+logger).  If the logger is not logging C<to_self> this raises an exception.
+
 =head1 SEE ALSO
 
 L<Log::Dispatch>
@@ -318,13 +349,14 @@ L<String::Flogger>
 
 =head1 AUTHOR
 
-Ricardo SIGNES, C<< <rjbs@cpan.org> >>
+  Ricardo SIGNES <rjbs@cpan.org>
 
-=head1 COPYRIGHT
+=head1 COPYRIGHT AND LICENSE
 
-Copyright 2008 Ricardo SIGNES.  This program is free software;  you can
-redistribute it and/or modify it under the same terms as Perl itself.
+This software is copyright (c) 2010 by Ricardo SIGNES.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
 
-1;
