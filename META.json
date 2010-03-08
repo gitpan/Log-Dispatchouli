@@ -6,8 +6,8 @@
       "version" : 1.4,
       "url" : "http://module-build.sourceforge.net/META-spec-v1.4.html"
    },
-   "generated_by" : "Dist::Zilla version 1.100630",
-   "version" : "1.100630",
+   "generated_by" : "Dist::Zilla version 1.100660",
+   "version" : "1.100660",
    "name" : "Log-Dispatchouli",
    "author" : [
       "Ricardo SIGNES <rjbs@cpan.org>"
@@ -16,19 +16,19 @@
    "build_requires" : {},
    "requires" : {
       "Try::Tiny" : "0.04",
-      "Scalar::Util" : 0,
-      "Log::Dispatch::Array" : 0,
-      "overload" : 0,
+      "Scalar::Util" : "0",
+      "Log::Dispatch::Array" : "0",
+      "overload" : "0",
       "Sys::Syslog" : "0.16",
-      "Carp" : 0,
+      "Carp" : "0",
       "Test::More" : "0.88",
-      "Log::Dispatch::File" : 0,
-      "Params::Util" : 0,
-      "Log::Dispatch::Screen" : 0,
-      "Log::Dispatch" : 0,
-      "Log::Dispatch::Syslog" : 0,
-      "Test::Deep" : 0,
-      "String::Flogger" : 0
+      "Log::Dispatch::File" : "0",
+      "Params::Util" : "0",
+      "Log::Dispatch::Screen" : "0",
+      "Log::Dispatch" : "0",
+      "Log::Dispatch::Syslog" : "0",
+      "Test::Deep" : "0",
+      "String::Flogger" : "0"
    },
    "abstract" : "a simple wrapper around Log::Dispatch",
    "configure_requires" : {

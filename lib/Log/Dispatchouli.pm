@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 package Log::Dispatchouli;
-our $VERSION = '1.100630';
+our $VERSION = '1.100660';
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
 use Carp ();
@@ -123,6 +123,7 @@ sub new_tester {
     to_stderr => 0,
     to_stdout => 0,
     to_file   => 0,
+    to_self   => 1,
     facility  => undef,
   });
 }
@@ -202,6 +203,15 @@ sub events {
   return $_[0]->{events};
 }
 
+
+sub clear_events {
+  Carp::confess "->events called on a logger not logging to self"
+    unless $_[0]->{events};
+
+  @{ $_[0]->{events} } = ();
+  return;
+}
+
 use overload
   '&{}'    => sub { my ($self) = @_; sub { $self->log(@_) } },
   fallback => 1,
@@ -219,7 +229,7 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 1.100630
+version 1.100660
 
 =head1 SYNOPSIS
 
@@ -282,8 +292,8 @@ If the F<DISPATCHOULI_NOSYSLOG> env var is true, we don't log to syslog.
 
 =head2 new_tester
 
-This returns a new logger that doesn't log.  It's useful in testing.  If no
-C<ident> arg is provided, one will be generated.
+This returns a new logger that logs only C<to_self>.  It's useful in testing.
+If no C<ident> arg is provided, one will be generated.
 
 =head2 log
 
@@ -340,6 +350,11 @@ you're looking for.  Move along.
 
 This method returns the arrayref of events logged to an array in memory (in the
 logger).  If the logger is not logging C<to_self> this raises an exception.
+
+=head2 clear_events
+
+This method empties the current sequence of events logged into an array in
+memory.  If the logger is not logging C<to_self> this raises an exception.
 
 =head1 SEE ALSO
 
