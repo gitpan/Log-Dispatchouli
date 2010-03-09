@@ -1,5 +1,8 @@
 Revision history for Log-Dispatchouli
 
+1.100670  2010-03-08 19:15:30 America/New_York
+          make env vars in code match env vars in docs
+
 1.100660  2010-03-07 22:00:58 America/New_York
           add clear_events method
           loggers made with new_tester log to_self

@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 package Log::Dispatchouli;
-our $VERSION = '1.100660';
+our $VERSION = '1.100670';
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
 use Carp ();
@@ -31,7 +31,7 @@ sub new {
   if ($arg->{to_file}) {
     require Log::Dispatch::File;
     my $log_file = File::Spec->catfile(
-      ($ENV{LOG_DISPATCHOULI} || File::Spec->tempdir),
+      ($ENV{DISPATCHOULI_PATH} || File::Spec->tempdir),
       sprintf('%s.%04u%02u%02u',
         $ident,
         ((localtime)[5] + 1900),
@@ -55,7 +55,7 @@ sub new {
     );
   }
 
-  if ($arg->{facility} and not $ENV{LOG_DISPATCHOULI_NOSYSLOG}) {
+  if ($arg->{facility} and not $ENV{DISPATCHOULI_NOSYSLOG}) {
     require Log::Dispatch::Syslog;
     $log->add(
       Log::Dispatch::Syslog->new(
@@ -229,7 +229,7 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 1.100660
+version 1.100670
 
 =head1 SYNOPSIS
 
