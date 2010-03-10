@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 package Log::Dispatchouli;
-our $VERSION = '1.100681';
+our $VERSION = '1.100690';
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
 use Carp ();
@@ -101,7 +101,7 @@ sub new {
   }
 
   $self->{dispatcher} = $log;
-  $self->{prefix} = $arg->{prefix} || $arg->{list_name};
+  $self->{prefix} = $arg->{prefix};
 
   $self->{debug}  = exists $arg->{debug}
                   ? $arg->{debug}
@@ -142,11 +142,7 @@ sub log {
     $message    = @flogged > 1 ? $self->_join(\@flogged) : $flogged[0];
 
     my $prefix = $arg->{prefix};
-
-    # XXX: ELIMINATE THIS -- rjbs, 2010-03-08
-    if (! defined $prefix and my $obs_prefix = $self->get_prefix) {
-      $prefix = "$obs_prefix: ";
-    }
+    $prefix = $self->get_prefix if ! defined $prefix;
 
     if (defined $prefix) {
       if (_CODELIKE( $prefix )) {
@@ -256,7 +252,7 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 1.100681
+version 1.100690
 
 =head1 SYNOPSIS
 

@@ -1,5 +1,9 @@
 Revision history for Log-Dispatchouli
 
+1.100690  2010-03-10 14:24:59 America/New_York
+          remove obsolete "list_name" alias to prefix
+          object-level prefix no longer automatically ends in ": "
+
 1.100681  2010-03-09 23:02:11 America/New_York
           rerelease with a tarball that isn't totally insane
 
