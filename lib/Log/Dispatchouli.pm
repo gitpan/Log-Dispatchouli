@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 package Log::Dispatchouli;
-our $VERSION = '1.100680';
+our $VERSION = '1.100681';
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
 use Carp ();
@@ -256,7 +256,7 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 1.100680
+version 1.100681
 
 =head1 SYNOPSIS
 
