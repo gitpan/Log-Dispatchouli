@@ -6,8 +6,8 @@
       "version" : 1.4,
       "url" : "http://module-build.sourceforge.net/META-spec-v1.4.html"
    },
-   "generated_by" : "Dist::Zilla version 1.100680",
-   "version" : "1.100691",
+   "generated_by" : "Dist::Zilla version 1.100710",
+   "version" : "1.100710",
    "name" : "Log-Dispatchouli",
    "author" : [
       "Ricardo SIGNES <rjbs@cpan.org>"

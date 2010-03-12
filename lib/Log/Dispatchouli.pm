@@ -1,12 +1,12 @@
 use strict;
 use warnings;
 package Log::Dispatchouli;
-our $VERSION = '1.100691';
+our $VERSION = '1.100710';
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
 use Carp ();
 use Log::Dispatch;
-use Params::Util qw(_ARRAYLIKE _HASHLIKE _CODELIKE);
+use Params::Util qw(_ARRAY0 _HASH0 _CODELIKE);
 use Scalar::Util qw(blessed weaken);
 use String::Flogger;
 use Try::Tiny 0.04;
@@ -104,8 +104,8 @@ sub new {
   $self->{prefix} = $arg->{prefix};
 
   $self->{debug}  = exists $arg->{debug}
-                  ? $arg->{debug}
-                  : $ENV{DISPATCHOULI_DEBUG};
+                  ? ($arg->{debug} ? 1 : 0)
+                  : ($ENV{DISPATCHOULI_DEBUG} ? 1 : 0);
 
   $self->{fail_fatal} = exists $arg->{fail_fatal} ? $arg->{fail_fatal} : 1;
 
@@ -113,42 +113,26 @@ sub new {
 }
 
 
-sub new_tester {
-  my ($class, $arg) = @_;
-  $arg ||= {};
-
-  return $class->new({
-    %$arg,
-    ($arg->{ident} ? () : (ident => "$$:$0")),
-    to_stderr => 0,
-    to_stdout => 0,
-    to_file   => 0,
-    to_self   => 1,
-    facility  => undef,
-  });
-}
-
-
 sub _join { shift; join q{ }, @{ $_[0] } }
 
 sub log {
   my ($self, @rest) = @_;
-  my $arg;
-  $arg = _HASHLIKE($rest[0]) ? shift(@rest) : {}; # for future expansion
+  my $arg = _HASH0($rest[0]) ? shift(@rest) : {};
 
   my $message;
   try {
     my @flogged = map {; String::Flogger->flog($_) } @rest;
     $message    = @flogged > 1 ? $self->_join(\@flogged) : $flogged[0];
 
-    my $prefix = $arg->{prefix};
-    $prefix = $self->get_prefix if ! defined $prefix;
+    my $prefix  = _ARRAY0($arg->{prefix})
+                ? [ @{ $arg->{prefix} } ]
+                : [ $arg->{prefix} ];
 
-    if (defined $prefix) {
-      if (_CODELIKE( $prefix )) {
-        $message = $prefix->($message);
+    for (reverse grep { defined } $self->get_prefix, @$prefix) {
+      if (_CODELIKE( $_ )) {
+        $message = $_->($message);
       } else {
-        $message =~ s/^/$prefix/gm;
+        $message =~ s/^/$_/gm;
       }
     }
 
@@ -166,20 +150,16 @@ sub log {
   return;
 }
 
-sub info { shift()->log(@_); }
-
 
 sub log_fatal {
   my ($self, @rest) = @_;
   my $arg;
-  $arg = _HASHLIKE($rest[0]) ? shift(@rest) : {}; # for future expansion
+  $arg = _HASH0($rest[0]) ? shift(@rest) : {}; # for future expansion
   local $arg->{level} = defined $arg->{level} ? $arg->{level} : 'error';
   local $arg->{fatal} = defined $arg->{fatal} ? $arg->{fatal} : 1;
 
   $self->log($arg, @rest);
 }
-
-sub fatal     { shift()->log_fatal(@_); }
 
 
 sub log_debug {
@@ -188,35 +168,44 @@ sub log_debug {
   return unless $self->is_debug;
 
   my $arg;
-  $arg = _HASHLIKE($rest[0]) ? shift(@rest) : {}; # for future expansion
+  $arg = _HASH0($rest[0]) ? shift(@rest) : {}; # for future expansion
   local $arg->{level} = defined $arg->{level} ? $arg->{level} : 'debug';
 
   $self->log($arg, @rest);
 }
 
-sub debug { shift()->log_debug(@_); }
-
 
 sub set_debug {
-  return($_[0]->{debug} = ! ! $_[1]);
+  return($_[0]->{debug} = $_[1] ? 1 : 0);
 }
 
 
-sub is_debug { return $_[0]->{debug} }
-
-sub is_info  { 1 }
-sub is_fatal { 1 }
+sub get_debug { return $_[0]->{debug} }
 
 
-sub dispatcher   { $_[0]->{dispatcher} }
+sub clear_debug { }
 
-sub get_prefix   {
-  return $_[0]->{prefix} if defined $_[0]->{prefix};
-  return;
-}
 
+sub get_prefix   { return $_[0]->{prefix}  }
 sub set_prefix   { $_[0]->{prefix} = $_[1] }
-sub unset_prefix { undef $_[0]->{prefix} }
+sub clear_prefix { $_[0]->unset_prefix     }
+sub unset_prefix { undef $_[0]->{prefix}   }
+
+
+sub new_tester {
+  my ($class, $arg) = @_;
+  $arg ||= {};
+
+  return $class->new({
+    ident     => "$$:$0",
+    %$arg,
+    to_stderr => 0,
+    to_stdout => 0,
+    to_file   => 0,
+    to_self   => 1,
+    facility  => undef,
+  });
+}
 
 
 sub events {
@@ -235,6 +224,36 @@ sub clear_events {
   return;
 }
 
+
+sub proxy {
+  my ($self, $arg) = @_;
+  $arg ||= {};
+
+  require Log::Dispatchouli::Proxy;
+  Log::Dispatchouli::Proxy->_new({
+    parent => $self,
+    logger => $self,
+    proxy_prefix => $arg->{proxy_prefix},
+    (exists $arg->{debug} ? (debug => ($arg->{debug} ? 1 : 0)) : ()),
+  });
+}
+
+
+sub parent { $_[0] }
+sub logger { $_[0] }
+
+
+sub dispatcher   { $_[0]->{dispatcher} }
+
+
+sub is_debug { $_[0]->get_debug }
+sub is_info  { 1 }
+sub is_fatal { 1 }
+
+sub info  { shift()->log(@_); }
+sub fatal { shift()->log_fatal(@_); }
+sub debug { shift()->log_debug(@_); }
+
 use overload
   '&{}'    => sub { my ($self) = @_; sub { $self->log(@_) } },
   fallback => 1,
@@ -252,7 +271,7 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 1.100691
+version 1.100710
 
 =head1 SYNOPSIS
 
@@ -313,11 +332,6 @@ The log path is either F</tmp> or the value of the F<DISPATCHOULI_PATH> env var.
 
 If the F<DISPATCHOULI_NOSYSLOG> env var is true, we don't log to syslog.
 
-=head2 new_tester
-
-This returns a new logger that logs only C<to_self>.  It's useful in testing.
-If no C<ident> arg is provided, one will be generated.
-
 =head2 log
 
   $logger->log(@messages);
@@ -328,11 +342,9 @@ This method uses L<String::Flogger> on the input, then logs the result.  Each
 message is flogged individually, then joined with spaces.
 
 If the first argument is a hashref, it will be used as extra arguments to
-logging.  At present, all entries in the hashref are ignored.
-
-This method can also be called as C<info>, to match other popular logging
-interfaces.  B<If you want to override this method, you must override C<log>
-and not C<info>>.
+logging.  It may include a C<prefix> entry to preprocess the message by
+prepending a string (if the prefix is a string) or calling a subroutine to
+generate a new message (if the prefix is a coderef).
 
 =head2 log_fatal
 
@@ -359,15 +371,93 @@ C<log_debug> and not C<debug>>.
 This sets the logger's debug property, which affects the behavior of
 C<log_debug>.
 
-=head2 is_debug
+=head2 get_debug
 
-C<is_debug> also exists as a read-only accessor.  Much less usefully,
-C<is_info> and C<is_fatal> exist, both of which always return true.
+This gets the logger's debug property, which affects the behavior of
+C<log_debug>.
+
+=head2 clear_debug
+
+This method does nothing, and is only useful for L<Log::Dispatchouli::Proxy>
+objects.  See L<Methods for Proxy Loggers/METHODS FOR PROXY LOGGERS>, below.
+
+=head2 get_prefix
+
+  my $prefix = $logger->get_prefix;
+
+This method returns the currently-set prefix for the logger, which may be a
+string or code reference or undef.  See L<Logger Prefix|/LOGGER PREFIX>.
+
+=head2 set_prefix
+
+  $logger->set_prefix( $new_prefix );
+
+This method changes the prefix.  See L<Logger Prefix|/LOGGER PREFIX>.
+
+=head2 clear_prefix
+
+This method clears any set logger prefix.  (It can also be called as
+C<unset_prefix>, but this is deprecated.  See L<Logger Prefix|/LOGGER PREFIX>.
 
 =head2 dispatcher
 
 This returns the underlying Log::Dispatch object.  This is not the method
 you're looking for.  Move along.
+
+=head1 LOGGER PREFIX
+
+Log messages may be prepended with information to set context.  This can be set
+at a logger level or per log item.  The simplest example is:
+
+  my $logger = Log::Dispatchouli->new( ... );
+
+  $logger->set_prefix("Batch 123: ");
+
+  $logger->log("begun processing");
+
+  # ...
+
+  $logger->log("finished processing");
+
+The above will log something like:
+
+  Batch 123: begun processing
+  Batch 123: finished processing
+
+To pass a prefix per-message:
+
+  $logger->log({ prefix => 'Sub-Item 234: ', 'error!' })
+
+  # Logs: Batch 123: Sub-Item 234: error!
+
+If the prefix is a string, it is prepended to each line of the message.  If it
+is a coderef, it is called and passed the message to be logged.  The return
+value is logged instead.
+
+L<Proxy loggers/|METHODS FOR PROXY LOGGERS> also have their own prefix
+settings, which accumulate.  So:
+
+  my $proxy = $logger->proxy({ proxy_prefix => 'Subsystem 12: ' });
+
+  $proxy->set_prefix('Page 9: ');
+
+  $proxy->log({ prefix => 'Paragraph 6: ' }, 'Done.');
+
+...will log...
+
+  Batch 123: Subsystem 12: Page 9: Paragraph 6: Done.
+
+=head1 METHODS FOR TESTING
+
+=head2 new_tester
+
+  my $logger = Log::Dispatchouli->new_tester( \%arg );
+
+This returns a new logger that logs only C<to_self>.  It's useful in testing.
+If no C<ident> arg is provided, one will be generated.  C<log_pid> is off by
+default, but can be overridden.
+
+C<\%arg> is optional.
 
 =head2 events
 
@@ -378,6 +468,69 @@ logger).  If the logger is not logging C<to_self> this raises an exception.
 
 This method empties the current sequence of events logged into an array in
 memory.  If the logger is not logging C<to_self> this raises an exception.
+
+=head1 METHODS FOR PROXY LOGGERS
+
+=head2 proxy
+
+  my $proxy_logger = $logger->proxy( \%arg );
+
+This method returns a new proxy logger -- an instance of
+L<Log::Dispatchouli::Proxy> -- which will log through the given logger, but
+which may have some settings localized.
+
+C<%arg> is optional.  It may contain the following entries:
+
+=over 4
+
+=item proxy_prefix
+
+This is a prefix that will be applied to anything the proxy logger logs, and
+cannot be changed.
+
+=item debug
+
+This can be set to true or false to change the proxy's "am I in debug mode?"
+setting.  It can be changed or cleared later on the proxy.
+
+=back
+
+=head2 parent
+
+=head2 logger
+
+These methods return the logger itself.  (They're more useful when called on
+proxy loggers.)
+
+=head1 METHODS FOR API COMPATIBILITY
+
+To provide compatibility with some other loggers, most specifically
+L<Log::Contextual>, the following methods are provided.  You should not use
+these methods without a good reason, and you should never subclass them.
+Instead, subclass the methods they call.
+
+=over 4
+
+=item is_debug
+
+This method calls C<get_debug>.
+
+=item is_info
+
+=item is_fatal
+
+These methods return true.
+
+=item info
+
+=item fatal
+
+=item debug
+
+These methods redispatch to C<log>, C<log_fatal>, and C<log_debug>
+respectively.
+
+=back
 
 =head1 SEE ALSO
 
