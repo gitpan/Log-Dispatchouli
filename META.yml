@@ -28,4 +28,4 @@ requires:
   overload: 0
 resources:
   repository: git://git.codesimply.com/Log-Dispatchouli.git
-version: 1.100710
+version: 1.100711

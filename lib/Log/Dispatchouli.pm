@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 package Log::Dispatchouli;
-our $VERSION = '1.100710';
+our $VERSION = '1.100711';
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
 use Carp ();
@@ -271,7 +271,7 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 1.100710
+version 1.100711
 
 =head1 SYNOPSIS
 
@@ -379,7 +379,7 @@ C<log_debug>.
 =head2 clear_debug
 
 This method does nothing, and is only useful for L<Log::Dispatchouli::Proxy>
-objects.  See L<Methods for Proxy Loggers/METHODS FOR PROXY LOGGERS>, below.
+objects.  See L<Methods for Proxy Loggers|/METHODS FOR PROXY LOGGERS>, below.
 
 =head2 get_prefix
 
@@ -434,7 +434,7 @@ If the prefix is a string, it is prepended to each line of the message.  If it
 is a coderef, it is called and passed the message to be logged.  The return
 value is logged instead.
 
-L<Proxy loggers/|METHODS FOR PROXY LOGGERS> also have their own prefix
+L<Proxy loggers|/METHODS FOR PROXY LOGGERS> also have their own prefix
 settings, which accumulate.  So:
 
   my $proxy = $logger->proxy({ proxy_prefix => 'Subsystem 12: ' });
@@ -534,9 +534,17 @@ respectively.
 
 =head1 SEE ALSO
 
+=over 4
+
+=item *
+
 L<Log::Dispatch>
 
+=item *
+
 L<String::Flogger>
+
+=back
 
 =head1 AUTHOR
 
