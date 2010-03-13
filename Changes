@@ -1,5 +1,9 @@
 Revision history for Log-Dispatchouli
 
+1.100712  2010-03-12 21:43:13 America/New_York
+          add the quiet_fatal argument to suppress apparent double-logging to
+          standard output and error streams
+
 1.100711  2010-03-12 18:11:41 America/New_York
 
 1.100710  2010-03-12 09:51:32 America/New_York

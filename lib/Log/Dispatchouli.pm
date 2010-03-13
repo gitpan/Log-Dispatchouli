@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 package Log::Dispatchouli;
-our $VERSION = '1.100711';
+our $VERSION = '1.100712';
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
 use Carp ();
@@ -11,12 +11,22 @@ use Scalar::Util qw(blessed weaken);
 use String::Flogger;
 use Try::Tiny 0.04;
 
+our @CARP_NOT = qw(Log::Dispatchouli::Proxy);
+
 
 sub new {
   my ($class, $arg) = @_;
 
   my $ident = $arg->{ident}
     or Carp::croak "no ident specified when using $class";
+
+  my %quiet_fatal;
+  for ('quiet_fatal') {
+    %quiet_fatal = map {; $_ => 1 } grep { defined }
+      exists $arg->{$_}
+        ? _ARRAY0($arg->{$_}) ? @{ $arg->{$_} } : $arg->{$_}
+        : ('stderr');
+  };
 
   my $pid_prefix = exists $arg->{log_pid} ? $arg->{log_pid} : 1;
 
@@ -95,7 +105,8 @@ sub new {
         name      => "std$dest",
         min_level => 'debug',
         stderr    => ($dest eq 'err' ? 1 : 0),
-        callbacks => sub { my %arg = @_; "$arg{message}\n"; }
+        callbacks => sub { my %arg = @_; "$arg{message}\n"; },
+        ($quiet_fatal{"std$dest"} ? (max_level => 'info') : ()),
       ),
     );
   }
@@ -145,7 +156,7 @@ sub log {
     die $_ if $self->{fail_fatal};
   };
 
-  die $message if $arg->{fatal};
+  Carp::croak $message if $arg->{fatal};
 
   return;
 }
@@ -271,7 +282,7 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 1.100711
+version 1.100712
 
 =head1 SYNOPSIS
 
@@ -317,16 +328,19 @@ This returns a new logger, a Log::Dispatchouli object.
 
 Valid arguments are:
 
-  ident      - the name of the thing logging (mandatory)
-  to_self    - log to the logger object for testing; default: false
-  to_file    - log to PROGRAM_NAME.YYYYMMDD in the log path; default: false
-  to_stdout  - log to STDOUT; default: false
-  to_stderr  - log to STDERR; default: false
-  facility   - to which syslog facility to send logs; default: none
-  log_pid    - if true, prefix all log entries with the pid; default: true
-  fail_fatal - a boolean; if true, failure to log is fatal; default: true
-  debug      - a boolean; if true, log_debug method is not a no-op
-               defaults to the truth of the DISPATCHOULI_DEBUG env var
+  ident       - the name of the thing logging (mandatory)
+  to_self     - log to the logger object for testing; default: false
+  to_file     - log to PROGRAM_NAME.YYYYMMDD in the log path; default: false
+  to_stdout   - log to STDOUT; default: false
+  to_stderr   - log to STDERR; default: false
+  facility    - to which syslog facility to send logs; default: none
+  log_pid     - if true, prefix all log entries with the pid; default: true
+  fail_fatal  - a boolean; if true, failure to log is fatal; default: true
+  debug       - a boolean; if true, log_debug method is not a no-op
+                defaults to the truth of the DISPATCHOULI_DEBUG env var
+  quiet_fatal - 'stderr' or 'stdout' or an arrayref of zero, one, or both
+                fatal log messages will not be logged to these
+                (default: stderr)
 
 The log path is either F</tmp> or the value of the F<DISPATCHOULI_PATH> env var.
 
