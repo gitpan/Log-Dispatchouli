@@ -4,11 +4,7 @@ use warnings;
 use Log::Dispatchouli;
 use Test::More 0.88;
 
-my $logger = Log::Dispatchouli->new_tester({
-  ident   => 'proxy-test',
-  log_pid => 0,
-  to_self => 1,
-});
+my $logger = Log::Dispatchouli->new_tester;
 
 sub are_events {
   my ($comment, $want) = @_;
@@ -102,6 +98,48 @@ $proxprox->log_debug("proxprox debug");
 
 are_events("debugging in middle tier", [
   'A: B: C: proxy debug',
+]);
+
+sub unmute_all {
+  $_->clear_muted for ($proxy, $proxprox);
+  $logger->unmute;
+};
+
+unmute_all;
+
+$proxprox->mute;
+$proxprox->log("proxprox");
+$proxy->log("proxy");
+$logger->log("logger");
+
+are_events("only muted proxprox", [
+  'A: B: C: proxy',
+  'A: logger',
+]);
+
+unmute_all;
+
+$proxy->mute;
+
+$proxprox->log("proxprox");
+$proxy->log("proxy");
+$logger->log("logger");
+
+are_events("muted proxy", [
+  'A: logger',
+]);
+
+unmute_all;
+
+$proxprox->unmute;
+$proxy->mute;
+
+$proxprox->log("proxprox");
+$proxy->log("proxy");
+$logger->log("logger");
+
+are_events("muted proxy, unmuted proxprox", [
+  'A: logger',
 ]);
 
 ok($logger->logger == $logger,   "logger->logger == logger");

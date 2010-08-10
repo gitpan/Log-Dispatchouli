@@ -1,7 +1,7 @@
 
 
-This archive contains the distribution Log-Dispatchouli, version
-1.100712:
+This archive contains the distribution Log-Dispatchouli,
+version 1.102220:
 
   a simple wrapper around Log::Dispatch
 
@@ -9,4 +9,5 @@ This software is copyright (c) 2010 by Ricardo SIGNES.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
+
 

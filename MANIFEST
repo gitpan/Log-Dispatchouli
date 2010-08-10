@@ -10,5 +10,4 @@ lib/Log/Dispatchouli.pm
 lib/Log/Dispatchouli/Proxy.pm
 t/basic.t
 t/proxy.t
-t/release-pod-coverage.t
 t/release-pod-syntax.t

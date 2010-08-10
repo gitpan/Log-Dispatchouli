@@ -1,7 +1,9 @@
 use strict;
 use warnings;
 package Log::Dispatchouli;
-our $VERSION = '1.100712';
+BEGIN {
+  $Log::Dispatchouli::VERSION = '1.102220';
+}
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
 use Carp ();
@@ -131,30 +133,33 @@ sub log {
   my $arg = _HASH0($rest[0]) ? shift(@rest) : {};
 
   my $message;
-  try {
-    my @flogged = map {; String::Flogger->flog($_) } @rest;
-    $message    = @flogged > 1 ? $self->_join(\@flogged) : $flogged[0];
 
-    my $prefix  = _ARRAY0($arg->{prefix})
-                ? [ @{ $arg->{prefix} } ]
-                : [ $arg->{prefix} ];
+  if ($arg->{fatal} or ! $self->get_muted) {
+    try {
+      my @flogged = map {; String::Flogger->flog($_) } @rest;
+      $message    = @flogged > 1 ? $self->_join(\@flogged) : $flogged[0];
 
-    for (reverse grep { defined } $self->get_prefix, @$prefix) {
-      if (_CODELIKE( $_ )) {
-        $message = $_->($message);
-      } else {
-        $message =~ s/^/$_/gm;
+      my $prefix  = _ARRAY0($arg->{prefix})
+                  ? [ @{ $arg->{prefix} } ]
+                  : [ $arg->{prefix} ];
+
+      for (reverse grep { defined } $self->get_prefix, @$prefix) {
+        if (_CODELIKE( $_ )) {
+          $message = $_->($message);
+        } else {
+          $message =~ s/^/$_/gm;
+        }
       }
-    }
 
-    $self->dispatcher->log(
-      level   => $arg->{level} || 'info',
-      message => $message,
-    );
-  } catch {
-    $message = '(no message could be logged)' unless defined $message;
-    die $_ if $self->{fail_fatal};
-  };
+      $self->dispatcher->log(
+        level   => $arg->{level} || 'info',
+        message => $message,
+      );
+    } catch {
+      $message = '(no message could be logged)' unless defined $message;
+      die $_ if $self->{fail_fatal};
+    };
+  }
 
   Carp::croak $message if $arg->{fatal};
 
@@ -164,8 +169,9 @@ sub log {
 
 sub log_fatal {
   my ($self, @rest) = @_;
-  my $arg;
-  $arg = _HASH0($rest[0]) ? shift(@rest) : {}; # for future expansion
+
+  my $arg = _HASH0($rest[0]) ? shift(@rest) : {}; # for future expansion
+
   local $arg->{level} = defined $arg->{level} ? $arg->{level} : 'error';
   local $arg->{fatal} = defined $arg->{fatal} ? $arg->{fatal} : 1;
 
@@ -178,8 +184,8 @@ sub log_debug {
 
   return unless $self->is_debug;
 
-  my $arg;
-  $arg = _HASH0($rest[0]) ? shift(@rest) : {}; # for future expansion
+  my $arg = _HASH0($rest[0]) ? shift(@rest) : {}; # for future expansion
+
   local $arg->{level} = defined $arg->{level} ? $arg->{level} : 'debug';
 
   $self->log($arg, @rest);
@@ -196,6 +202,20 @@ sub get_debug { return $_[0]->{debug} }
 
 sub clear_debug { }
 
+sub mute   { $_[0]{muted} = 1 }
+sub unmute { $_[0]{muted} = 0 }
+
+
+sub set_muted {
+  return($_[0]->{muted} = $_[1] ? 1 : 0);
+}
+
+
+sub get_muted { return $_[0]->{muted} }
+
+
+sub clear_muted { }
+
 
 sub get_prefix   { return $_[0]->{prefix}  }
 sub set_prefix   { $_[0]->{prefix} = $_[1] }
@@ -209,6 +229,7 @@ sub new_tester {
 
   return $class->new({
     ident     => "$$:$0",
+    log_pid   => 0,
     %$arg,
     to_stderr => 0,
     to_stdout => 0,
@@ -282,7 +303,7 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 1.100712
+version 1.102220
 
 =head1 SYNOPSIS
 
@@ -336,6 +357,7 @@ Valid arguments are:
   facility    - to which syslog facility to send logs; default: none
   log_pid     - if true, prefix all log entries with the pid; default: true
   fail_fatal  - a boolean; if true, failure to log is fatal; default: true
+  muted       - a boolean; if true, only fatals are logged; default: false
   debug       - a boolean; if true, log_debug method is not a no-op
                 defaults to the truth of the DISPATCHOULI_DEBUG env var
   quiet_fatal - 'stderr' or 'stdout' or an arrayref of zero, one, or both
@@ -391,6 +413,23 @@ This gets the logger's debug property, which affects the behavior of
 C<log_debug>.
 
 =head2 clear_debug
+
+This method does nothing, and is only useful for L<Log::Dispatchouli::Proxy>
+objects.  See L<Methods for Proxy Loggers|/METHODS FOR PROXY LOGGERS>, below.
+
+=head2 set_muted
+
+  $logger->set_muted($bool);
+
+This sets the logger's muted property, which affects the behavior of
+C<log>.
+
+=head2 get_muted
+
+This gets the logger's muted property, which affects the behavior of
+C<log>.
+
+=head2 clear_muted
 
 This method does nothing, and is only useful for L<Log::Dispatchouli::Proxy>
 objects.  See L<Methods for Proxy Loggers|/METHODS FOR PROXY LOGGERS>, below.
@@ -562,7 +601,7 @@ L<String::Flogger>
 
 =head1 AUTHOR
 
-  Ricardo SIGNES <rjbs@cpan.org>
+Ricardo SIGNES <rjbs@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 

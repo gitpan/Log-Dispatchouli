@@ -6,7 +6,7 @@ use Test::More 0.88;
 use Test::Deep;
 
 {
-  my $logger = Log::Dispatchouli->new_tester({ to_self => 1 });
+  my $logger = Log::Dispatchouli->new_tester({ log_pid => 1 });
 
   isa_ok($logger, 'Log::Dispatchouli');
 
@@ -158,6 +158,42 @@ END_LOG
     $logger->events->[1]{message},
     $want_1,
     "multi-line and prefix (code)",
+  );
+}
+
+{
+  my $logger = Log::Dispatchouli->new_tester({ debug => 1 });
+
+  $logger->log('info');
+  $logger->log('debug');
+
+  cmp_deeply(
+    $logger->events,
+    [
+      superhashof({ message => 'info' }),
+      superhashof({ message => 'debug' }),
+    ],
+    'info and debug while not muted',
+  );
+
+  $logger->clear_events;
+
+  $logger->mute;
+
+  $logger->log('info');
+  $logger->log('debug');
+
+  cmp_deeply($logger->events, [ ], 'nothing logged while muted');
+
+  ok(
+    ! eval { $logger->log_fatal('fatal'); 1},
+    "log_fatal still dies while muted",
+  );
+
+  cmp_deeply(
+    $logger->events,
+    [ superhashof({ message => 'fatal' }) ],
+    'logged a fatal even while muted'
   );
 }
 

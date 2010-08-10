@@ -1,7 +1,9 @@
 use strict;
 use warnings;
 package Log::Dispatchouli::Proxy;
-our $VERSION = '1.100712';
+BEGIN {
+  $Log::Dispatchouli::Proxy::VERSION = '1.102220';
+}
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
 use Params::Util qw(_ARRAY0 _HASH0);
@@ -28,6 +30,7 @@ sub proxy  {
     parent => $self,
     logger => $self->logger,
     debug  => $arg->{debug},
+    muted  => $arg->{muted},
     proxy_prefix => $arg->{proxy_prefix},
   });
 }
@@ -48,6 +51,19 @@ sub get_debug {
   return $_[0]->parent->get_debug;
 }
 
+sub mute   { $_[0]{muted} = 1 }
+sub unmute { $_[0]{muted} = 0 }
+
+sub set_muted    { $_[0]{muted} = $_[1] ? 1 : 0 }
+sub clear_muted  { undef $_[0]{muted} }
+
+sub _get_local_muted { $_[0]{muted} }
+
+sub get_muted {
+  return $_[0]{muted} if defined $_[0]{muted};
+  return $_[0]->parent->get_muted;
+}
+
 sub _get_all_prefix {
   my ($self, $arg) = @_;
 
@@ -61,6 +77,9 @@ sub _get_all_prefix {
 sub log {
   my ($self, @rest) = @_;
   my $arg = _HASH0($rest[0]) ? shift(@rest) : {};
+
+  return if $self->_get_local_muted and ! $arg->{fatal};
+
   local $arg->{prefix} = $self->_get_all_prefix($arg);
 
   $self->parent->log($arg, @rest);
@@ -70,9 +89,9 @@ sub log_fatal {
   my ($self, @rest) = @_;
 
   my $arg = _HASH0($rest[0]) ? shift(@rest) : {};
-  local $arg->{prefix} = $self->_get_all_prefix($arg);
+  local $arg->{fatal}  = 1;
 
-  $self->parent->log_fatal($arg, @rest);
+  $self->log($arg, @rest);
 }
 
 sub log_debug {
@@ -82,15 +101,9 @@ sub log_debug {
   return if defined $debug and ! $debug;
 
   my $arg = _HASH0($rest[0]) ? shift(@rest) : {};
-  local $arg->{prefix} = $self->_get_all_prefix($arg);
+  local $arg->{level} = 'debug';
 
-  if ($debug) {
-    local $arg->{level} = 'debug';
-    $self->parent->log($arg, @rest);
-    return;
-  }
-
-  $self->parent->log_debug($arg, @rest);
+  $self->log($arg, @rest);
 }
 
 1;
@@ -104,7 +117,7 @@ Log::Dispatchouli::Proxy - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 1.100712
+version 1.102220
 
 =head1 DESCRIPTION
 
@@ -133,7 +146,7 @@ C<log_debug> messages will be redispatched to C<log> (bug to the 'debug' logging
 
 =head1 AUTHOR
 
-  Ricardo SIGNES <rjbs@cpan.org>
+Ricardo SIGNES <rjbs@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
