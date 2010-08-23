@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Log::Dispatchouli;
 BEGIN {
-  $Log::Dispatchouli::VERSION = '1.102220';
+  $Log::Dispatchouli::VERSION = '1.102350';
 }
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
@@ -43,7 +43,7 @@ sub new {
   if ($arg->{to_file}) {
     require Log::Dispatch::File;
     my $log_file = File::Spec->catfile(
-      ($ENV{DISPATCHOULI_PATH} || File::Spec->tempdir),
+      ($ENV{DISPATCHOULI_PATH} || File::Spec->tmpdir),
       sprintf('%s.%04u%02u%02u',
         $ident,
         ((localtime)[5] + 1900),
@@ -303,7 +303,7 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 1.102220
+version 1.102350
 
 =head1 SYNOPSIS
 
