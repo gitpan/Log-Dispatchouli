@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Log::Dispatchouli::Proxy;
 BEGIN {
-  $Log::Dispatchouli::Proxy::VERSION = '1.102350';
+  $Log::Dispatchouli::Proxy::VERSION = '2.000';
 }
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
@@ -37,6 +37,8 @@ sub proxy  {
 
 sub parent { $_[0]{parent} }
 sub logger { $_[0]{logger} }
+
+sub ident  { $_[0]{logger}->ident }
 
 sub set_prefix   { $_[0]{prefix} = $_[1] }
 sub get_prefix   { $_[0]{prefix} }
@@ -117,7 +119,7 @@ Log::Dispatchouli::Proxy - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 1.102350
+version 2.000
 
 =head1 DESCRIPTION
 

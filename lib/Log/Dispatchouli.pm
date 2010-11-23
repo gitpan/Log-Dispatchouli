@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Log::Dispatchouli;
 BEGIN {
-  $Log::Dispatchouli::VERSION = '1.102350';
+  $Log::Dispatchouli::VERSION = '2.000';
 }
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
@@ -115,6 +115,7 @@ sub new {
 
   $self->{dispatcher} = $log;
   $self->{prefix} = $arg->{prefix};
+  $self->{ident}  = $ident;
 
   $self->{debug}  = exists $arg->{debug}
                   ? ($arg->{debug} ? 1 : 0)
@@ -223,6 +224,9 @@ sub clear_prefix { $_[0]->unset_prefix     }
 sub unset_prefix { undef $_[0]->{prefix}   }
 
 
+sub ident { $_[0]{ident} }
+
+
 sub new_tester {
   my ($class, $arg) = @_;
   $arg ||= {};
@@ -303,7 +307,7 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 1.102350
+version 2.000
 
 =head1 SYNOPSIS
 
@@ -451,6 +455,10 @@ This method changes the prefix.  See L<Logger Prefix|/LOGGER PREFIX>.
 
 This method clears any set logger prefix.  (It can also be called as
 C<unset_prefix>, but this is deprecated.  See L<Logger Prefix|/LOGGER PREFIX>.
+
+=head2 ident
+
+This method returns the logger's ident.
 
 =head2 dispatcher
 
