@@ -2,11 +2,12 @@ use strict;
 use warnings;
 package Log::Dispatchouli;
 BEGIN {
-  $Log::Dispatchouli::VERSION = '2.000';
+  $Log::Dispatchouli::VERSION = '2.001';
 }
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
 use Carp ();
+use File::Spec ();
 use Log::Dispatch;
 use Params::Util qw(_ARRAY0 _HASH0 _CODELIKE);
 use Scalar::Util qw(blessed weaken);
@@ -137,7 +138,8 @@ sub log {
 
   if ($arg->{fatal} or ! $self->get_muted) {
     try {
-      my @flogged = map {; String::Flogger->flog($_) } @rest;
+      my $flogger = $self->string_flogger;
+      my @flogged = map {; $flogger->flog($_) } @rest;
       $message    = @flogged > 1 ? $self->_join(\@flogged) : $flogged[0];
 
       my $prefix  = _ARRAY0($arg->{prefix})
@@ -227,6 +229,10 @@ sub unset_prefix { undef $_[0]->{prefix}   }
 sub ident { $_[0]{ident} }
 
 
+
+sub string_flogger { 'String::Flogger' }
+
+
 sub new_tester {
   my ($class, $arg) = @_;
   $arg ||= {};
@@ -307,7 +313,7 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 2.000
+version 2.001
 
 =head1 SYNOPSIS
 
@@ -508,6 +514,13 @@ settings, which accumulate.  So:
 
   Batch 123: Subsystem 12: Page 9: Paragraph 6: Done.
 
+=head1 METHODS FOR SUBCLASSING
+
+=head2 string_flogger
+
+This method returns the thing on which F<flog> will be called to format log
+messages.  By default, it just returns C<String::Flogger>
+
 =head1 METHODS FOR TESTING
 
 =head2 new_tester
@@ -613,7 +626,7 @@ Ricardo SIGNES <rjbs@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2010 by Ricardo SIGNES.
+This software is copyright (c) 2011 by Ricardo SIGNES.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

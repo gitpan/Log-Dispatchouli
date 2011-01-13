@@ -25,6 +25,7 @@ my %WriteMakefileArgs = (
   'NAME' => 'Log::Dispatchouli',
   'PREREQ_PM' => {
     'Carp' => '0',
+    'File::Spec' => '0',
     'Log::Dispatch' => '0',
     'Log::Dispatch::Array' => '0',
     'Log::Dispatch::File' => '0',
@@ -39,7 +40,7 @@ my %WriteMakefileArgs = (
     'Try::Tiny' => '0.04',
     'overload' => '0'
   },
-  'VERSION' => '2.000',
+  'VERSION' => '2.001',
   'test' => {
     'TESTS' => 't/*.t'
   }

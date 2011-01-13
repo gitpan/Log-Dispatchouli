@@ -10,6 +10,11 @@ lib/Log/Dispatchouli.pm
 lib/Log/Dispatchouli/Global.pm
 lib/Log/Dispatchouli/Proxy.pm
 t/basic.t
+t/global-subclass.t
 t/global.t
+t/lib/DDR/Child.pm
+t/lib/DDR/Parent.pm
+t/lib/SDR/Child.pm
+t/lib/SDR/Parent.pm
 t/proxy.t
 t/release-pod-syntax.t

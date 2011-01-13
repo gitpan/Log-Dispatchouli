@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Log::Dispatchouli::Global;
 BEGIN {
-  $Log::Dispatchouli::Global::VERSION = '2.000';
+  $Log::Dispatchouli::Global::VERSION = '2.001';
 }
 # ABSTRACT: a system for sharing a global, dynamically-scoped logger
 
@@ -36,11 +36,12 @@ sub current_logger {
 }
 
 
-my $default_logger;
 sub default_logger {
   my ($self) = @_;
 
-  $default_logger ||= $self->default_logger_class->new(
+  my $ref = $self->default_logger_ref;
+
+  $$ref ||= $self->default_logger_class->new(
     $self->default_logger_args
   );
 }
@@ -54,6 +55,17 @@ sub default_logger_args {
     ident     => "default/$0",
     facility  => undef,
   }
+}
+
+
+my %default_logger_for_glob;
+
+sub default_logger_ref {
+  my ($self) = @_;
+
+  my $glob = $self->logger_globref;
+  my $addr = Scalar::Util::refaddr($glob);
+  return \$default_logger_for_glob{ $addr };
 }
 
 sub _build_logger {
@@ -81,6 +93,7 @@ sub _build_logger {
   return $globref;
 }
 
+
 1;
 
 __END__
@@ -92,7 +105,7 @@ Log::Dispatchouli::Global - a system for sharing a global, dynamically-scoped lo
 
 =head1 VERSION
 
-version 2.000
+version 2.001
 
 =head1 DESCRIPTION
 
@@ -195,13 +208,68 @@ passing the results of calling this method.
 Its default return value creates a sink, so that anything logged without an
 initialized logger is lost.
 
+=head2 default_logger_ref
+
+This method returns a scalar reference in which the cached default value is
+stored for comparison.  This is used when someone tries to C<init> the global.
+When someone tries to initialize the global logger, and it's already set, then:
+
+=over 4
+
+=item *
+
+if the current value is the same as the default, the new value is set
+
+=item *
+
+if the current value is I<not> the same as the default, we die
+
+=back
+
+Since you want the default to be isolated to your application's logger, the
+default behavior is default loggers are associated with the glob reference to
+which the default might be assigned.  It is recommended that you replace this
+method to return a shared, private variable for your subclasses, by putting the
+following code in the base class for your Log::Dispatchouli::Global classes:
+
+  my $default_logger;
+  sub default_logger_ref { \$default_logger };
+
+=head1 COOKBOOK
+
+=head2 Common Logger Recipes
+
+Say you often use the same configuration for one kind of program, like
+automated tests.  You've already written your own subclass to get your own
+storage and defaults, maybe C<MyApp::Logger>.
+
+You can't just write a subclass with a different default, because if another
+class using the same global has set the global with I<its> default, yours won't
+be honored.  You don't just want this new value to be the default, you want it
+to be I<the> logger.  What you want to do in this case is to initialize your
+logger normally, then reexport it, like this:
+
+  package MyApp::Logger::Test;
+  use parent 'MyApp::Logger';
+
+  use MyApp::Logger '$Logger' => {
+    init => {
+      ident    => "Tester($0)",
+      to_self  => 1,
+      facility => undef,
+    },
+  };
+
+This will set up the logger and re-export it, and will properly die if anything
+else attempts to initialize the logger to something else.
+
 =head1 AUTHOR
 
 Ricardo SIGNES <rjbs@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2010 by Ricardo SIGNES.
+This software is copyright (c) 2011 by Ricardo SIGNES.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
