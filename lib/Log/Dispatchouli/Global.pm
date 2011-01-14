@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Log::Dispatchouli::Global;
 BEGIN {
-  $Log::Dispatchouli::Global::VERSION = '2.001';
+  $Log::Dispatchouli::Global::VERSION = '2.002';
 }
 # ABSTRACT: a system for sharing a global, dynamically-scoped logger
 
@@ -105,7 +105,7 @@ Log::Dispatchouli::Global - a system for sharing a global, dynamically-scoped lo
 
 =head1 VERSION
 
-version 2.001
+version 2.002
 
 =head1 DESCRIPTION
 

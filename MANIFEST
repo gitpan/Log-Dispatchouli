@@ -10,6 +10,7 @@ lib/Log/Dispatchouli.pm
 lib/Log/Dispatchouli/Global.pm
 lib/Log/Dispatchouli/Proxy.pm
 t/basic.t
+t/env-value.t
 t/global-subclass.t
 t/global.t
 t/lib/DDR/Child.pm

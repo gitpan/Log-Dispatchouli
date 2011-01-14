@@ -33,7 +33,7 @@ requires:
   overload: 0
 resources:
   repository: git://git.codesimply.com/Log-Dispatchouli.git
-version: 2.001
+version: 2.002
 x_Dist_Zilla:
   plugins:
     -
