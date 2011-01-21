@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Log::Dispatchouli;
 BEGIN {
-  $Log::Dispatchouli::VERSION = '2.003';
+  $Log::Dispatchouli::VERSION = '2.004';
 }
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
@@ -335,7 +335,7 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 2.003
+version 2.004
 
 =head1 SYNOPSIS
 

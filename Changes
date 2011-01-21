@@ -1,5 +1,8 @@
 Revision history for Log-Dispatchouli
 
+2.004     2011-01-21 15:52:41 America/New_York
+          BUG FIX:  it is okay to replace the default logger, always
+
 2.003     2011-01-21 13:14:43 America/New_York
           add config_id to allow faking Global equality when testing
 

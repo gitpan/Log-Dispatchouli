@@ -53,7 +53,7 @@
          "url" : "git://git.codesimply.com/Log-Dispatchouli.git"
       }
    },
-   "version" : "2.003",
+   "version" : "2.004",
    "x_Dist_Zilla" : {
       "plugins" : [
          {
