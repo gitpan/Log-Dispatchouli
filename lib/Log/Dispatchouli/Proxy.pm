@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Log::Dispatchouli::Proxy;
 BEGIN {
-  $Log::Dispatchouli::Proxy::VERSION = '2.002';
+  $Log::Dispatchouli::Proxy::VERSION = '2.003';
 }
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
@@ -38,7 +38,8 @@ sub proxy  {
 sub parent { $_[0]{parent} }
 sub logger { $_[0]{logger} }
 
-sub ident  { $_[0]{logger}->ident }
+sub ident     { $_[0]{logger}->ident }
+sub config_id { $_[0]{logger}->config_id }
 
 sub set_prefix   { $_[0]{prefix} = $_[1] }
 sub get_prefix   { $_[0]{prefix} }
@@ -119,7 +120,7 @@ Log::Dispatchouli::Proxy - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 2.002
+version 2.003
 
 =head1 DESCRIPTION
 

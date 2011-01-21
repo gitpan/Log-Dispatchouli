@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Log::Dispatchouli::Global;
 BEGIN {
-  $Log::Dispatchouli::Global::VERSION = '2.002';
+  $Log::Dispatchouli::Global::VERSION = '2.003';
 }
 # ABSTRACT: a system for sharing a global, dynamically-scoped logger
 
@@ -68,6 +68,14 @@ sub default_logger_ref {
   return \$default_logger_for_glob{ $addr };
 }
 
+sub _equiv {
+  my ($self, $x, $y) = @_;
+
+  return 1 if Scalar::Util::refaddr($x) == Scalar::Util::refaddr($y);
+  return 1 if $x->config_id eq $y->config_id;
+  return
+}
+
 sub _build_logger {
   my ($self, $arg) = @_;
 
@@ -77,15 +85,26 @@ sub _build_logger {
   my $Logger  = $$$globref;
 
   if ($arg and $arg->{init}) {
-    if (
-      $Logger
-      and
-      Scalar::Util::refaddr($Logger) != Scalar::Util::refaddr($default)
-    ) {
-      Carp::confess("attempted to initialize $self logger twice");
+    my $new_logger = $self->default_logger_class->new($arg->{init});
+
+    if ($Logger and ! $self->_equiv($Logger, $new_logger)) {
+      # We already set up a logger, so we'll check that our new one is
+      # equivalent to the old.  If so, we'll keep the old, since it's good
+      # enough.  If not, we'll raise an exception: you can't configure the
+      # logger twice, with different configurations, in one program!
+      # -- rjbs, 2011-01-21
+      my $old = $Logger->config_id;
+      my $new = $new_logger->config_id;
+
+      Carp::confess(sprintf(
+        "attempted to initialize %s logger twice; old config %s, new config %s",
+        $self,
+        $old,
+        $new,
+      ));
     }
 
-    $$$globref = $self->default_logger_class->new($arg->{init});
+    $$$globref = $new_logger;
   } else {
     $$$globref ||= $default;
   }
@@ -105,7 +124,7 @@ Log::Dispatchouli::Global - a system for sharing a global, dynamically-scoped lo
 
 =head1 VERSION
 
-version 2.002
+version 2.003
 
 =head1 DESCRIPTION
 

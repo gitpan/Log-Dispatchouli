@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Log::Dispatchouli;
 BEGIN {
-  $Log::Dispatchouli::VERSION = '2.002';
+  $Log::Dispatchouli::VERSION = '2.003';
 }
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
@@ -22,6 +22,8 @@ sub new {
 
   my $ident = $arg->{ident}
     or Carp::croak "no ident specified when using $class";
+
+  my $config_id = defined $arg->{config_id} ? $arg->{config_id} : $ident;
 
   my %quiet_fatal;
   for ('quiet_fatal') {
@@ -115,8 +117,9 @@ sub new {
   }
 
   $self->{dispatcher} = $log;
-  $self->{prefix} = $arg->{prefix};
-  $self->{ident}  = $ident;
+  $self->{prefix}     = $arg->{prefix};
+  $self->{ident}      = $ident;
+  $self->{config_id}  = $config_id;
 
   $self->{debug}  = exists $arg->{debug}
                   ? ($arg->{debug} ? 1 : 0)
@@ -229,6 +232,8 @@ sub unset_prefix { undef $_[0]->{prefix}   }
 sub ident { $_[0]{ident} }
 
 
+sub config_id { $_[0]{config_id} }
+
 
 sub string_flogger { 'String::Flogger' }
 
@@ -330,7 +335,7 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 2.002
+version 2.003
 
 =head1 SYNOPSIS
 
@@ -390,6 +395,7 @@ Valid arguments are:
   quiet_fatal - 'stderr' or 'stdout' or an arrayref of zero, one, or both
                 fatal log messages will not be logged to these
                 (default: stderr)
+  config_id   - a name for this logger's config; rarely needed!
 
 The log path is either F</tmp> or the value of the F<DISPATCHOULI_PATH> env var.
 
@@ -482,6 +488,13 @@ C<unset_prefix>, but this is deprecated.  See L<Logger Prefix|/LOGGER PREFIX>.
 =head2 ident
 
 This method returns the logger's ident.
+
+=head2 config_id
+
+This method returns the logger's configuration id, which defaults to its ident.
+This can be used to make two loggers equivalent in Log::Dispatchouli::Global so
+that trying to reinitialize with a new logger with the same C<config_id> as the
+current logger will not throw an exception, and will simply do no thing.
 
 =head2 dispatcher
 
