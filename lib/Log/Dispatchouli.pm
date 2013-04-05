@@ -1,8 +1,8 @@
 use strict;
 use warnings;
 package Log::Dispatchouli;
-BEGIN {
-  $Log::Dispatchouli::VERSION = '2.005';
+{
+  $Log::Dispatchouli::VERSION = '2.006';
 }
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
@@ -327,6 +327,7 @@ use overload
 1;
 
 __END__
+
 =pod
 
 =head1 NAME
@@ -335,7 +336,7 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 2.005
+version 2.006
 
 =head1 SYNOPSIS
 
@@ -680,10 +681,9 @@ Ricardo SIGNES <rjbs@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2011 by Ricardo SIGNES.
+This software is copyright (c) 2013 by Ricardo SIGNES.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

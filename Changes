@@ -1,5 +1,9 @@
 Revision history for Log-Dispatchouli
 
+2.006     2013-04-05 15:02:05 America/New_York
+          put the ->info, ->fatal, ->debug methods on proxies, too
+          (thanks George Hartzell)
+
 2.005     2011-04-07 23:16:40 America/New_York
           add log_file and log_path options
 

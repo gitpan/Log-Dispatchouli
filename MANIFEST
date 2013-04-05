@@ -9,6 +9,8 @@ dist.ini
 lib/Log/Dispatchouli.pm
 lib/Log/Dispatchouli/Global.pm
 lib/Log/Dispatchouli/Proxy.pm
+t/00-compile.t
+t/000-report-versions-tiny.t
 t/basic.t
 t/env-value.t
 t/global-subclass.t
@@ -18,4 +20,5 @@ t/lib/DDR/Parent.pm
 t/lib/SDR/Child.pm
 t/lib/SDR/Parent.pm
 t/proxy.t
-t/release-pod-syntax.t
+xt/release/changes_has_content.t
+xt/release/pod-syntax.t

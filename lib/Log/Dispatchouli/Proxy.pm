@@ -1,8 +1,8 @@
 use strict;
 use warnings;
 package Log::Dispatchouli::Proxy;
-BEGIN {
-  $Log::Dispatchouli::Proxy::VERSION = '2.005';
+{
+  $Log::Dispatchouli::Proxy::VERSION = '2.006';
 }
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
@@ -109,9 +109,14 @@ sub log_debug {
   $self->log($arg, @rest);
 }
 
+sub info  { shift()->log(@_); }
+sub fatal { shift()->log_fatal(@_); }
+sub debug { shift()->log_debug(@_); }
+
 1;
 
 __END__
+
 =pod
 
 =head1 NAME
@@ -120,7 +125,7 @@ Log::Dispatchouli::Proxy - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 2.005
+version 2.006
 
 =head1 DESCRIPTION
 
@@ -153,10 +158,9 @@ Ricardo SIGNES <rjbs@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2011 by Ricardo SIGNES.
+This software is copyright (c) 2013 by Ricardo SIGNES.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
