@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Log::Dispatchouli::Global;
 {
-  $Log::Dispatchouli::Global::VERSION = '2.006';
+  $Log::Dispatchouli::Global::VERSION = '2.007';
 }
 # ABSTRACT: a system for sharing a global, dynamically-scoped logger
 
@@ -131,7 +131,7 @@ Log::Dispatchouli::Global - a system for sharing a global, dynamically-scoped lo
 
 =head1 VERSION
 
-version 2.006
+version 2.007
 
 =head1 DESCRIPTION
 
@@ -171,7 +171,7 @@ this:
   }
 
 This eliminates the need to pass around what is effectively a global, while
-still allowing it to be specialized withing certain contexts of your program.
+still allowing it to be specialized within certain contexts of your program.
 
 B<Warning!>  Although you I<could> just use Log::Dispatchouli::Global as your
 shared logging library, you almost I<certainly> want to write a subclass that
@@ -254,12 +254,8 @@ if the current value is I<not> the same as the default, we die
 
 Since you want the default to be isolated to your application's logger, the
 default behavior is default loggers are associated with the glob reference to
-which the default might be assigned.  It is recommended that you replace this
-method to return a shared, private variable for your subclasses, by putting the
-following code in the base class for your Log::Dispatchouli::Global classes:
-
-  my $default_logger;
-  sub default_logger_ref { \$default_logger };
+which the default might be assigned.  It is unlikely that you will need to
+interact with this method.
 
 =head1 COOKBOOK
 

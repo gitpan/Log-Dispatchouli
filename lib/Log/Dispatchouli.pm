@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Log::Dispatchouli;
 {
-  $Log::Dispatchouli::VERSION = '2.006';
+  $Log::Dispatchouli::VERSION = '2.007';
 }
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
@@ -336,7 +336,7 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 2.006
+version 2.007
 
 =head1 SYNOPSIS
 
@@ -529,7 +529,7 @@ The above will log something like:
 
 To pass a prefix per-message:
 
-  $logger->log({ prefix => 'Sub-Item 234: ', 'error!' })
+  $logger->log({ prefix => 'Sub-Item 234: ' }, 'error!')
 
   # Logs: Batch 123: Sub-Item 234: error!
 
