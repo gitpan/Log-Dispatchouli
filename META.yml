@@ -44,7 +44,7 @@ resources:
   bugtracker: https://github.com/rjbs/Log-Dispatchouli/issues
   homepage: https://github.com/rjbs/Log-Dispatchouli
   repository: https://github.com/rjbs/Log-Dispatchouli.git
-version: 2.007
+version: 2.008
 x_Dist_Zilla:
   perl:
     version: 5.019003
