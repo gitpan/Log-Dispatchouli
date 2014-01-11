@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Log::Dispatchouli;
 {
-  $Log::Dispatchouli::VERSION = '2.008';
+  $Log::Dispatchouli::VERSION = '2.009';
 }
 # ABSTRACT: a simple wrapper around Log::Dispatch
 
@@ -14,7 +14,120 @@ use Scalar::Util qw(blessed weaken);
 use String::Flogger;
 use Try::Tiny 0.04;
 
+require Log::Dispatchouli::Proxy;
+
 our @CARP_NOT = qw(Log::Dispatchouli::Proxy);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 sub new {
@@ -131,6 +244,21 @@ sub new {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 sub _join { shift; join q{ }, @{ $_[0] } }
 
 sub log {
@@ -173,6 +301,16 @@ sub log {
 }
 
 
+
+
+
+
+
+
+
+
+
+
 sub log_fatal {
   my ($self, @rest) = @_;
 
@@ -183,6 +321,16 @@ sub log_fatal {
 
   $self->log($arg, @rest);
 }
+
+
+
+
+
+
+
+
+
+
 
 
 sub log_debug {
@@ -198,12 +346,32 @@ sub log_debug {
 }
 
 
+
+
+
+
+
+
+
+
 sub set_debug {
   return($_[0]->{debug} = $_[1] ? 1 : 0);
 }
 
 
+
+
+
+
+
+
 sub get_debug { return $_[0]->{debug} }
+
+
+
+
+
+
 
 
 sub clear_debug { }
@@ -212,15 +380,54 @@ sub mute   { $_[0]{muted} = 1 }
 sub unmute { $_[0]{muted} = 0 }
 
 
+
+
+
+
+
+
+
+
 sub set_muted {
   return($_[0]->{muted} = $_[1] ? 1 : 0);
 }
 
 
+
+
+
+
+
+
 sub get_muted { return $_[0]->{muted} }
 
 
+
+
+
+
+
+
 sub clear_muted { }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 sub get_prefix   { return $_[0]->{prefix}  }
@@ -229,16 +436,58 @@ sub clear_prefix { $_[0]->unset_prefix     }
 sub unset_prefix { undef $_[0]->{prefix}   }
 
 
+
+
+
+
+
 sub ident { $_[0]{ident} }
+
+
+
+
+
+
+
+
 
 
 sub config_id { $_[0]{config_id} }
 
 
+
+
+
+
+
+
+
+
 sub string_flogger { 'String::Flogger' }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 sub env_prefix { return; }
+
+
+
+
+
+
+
+
+
 
 
 sub env_value {
@@ -253,6 +502,19 @@ sub env_value {
 
   return;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 sub new_tester {
@@ -272,12 +534,24 @@ sub new_tester {
 }
 
 
+
+
+
+
+
+
 sub events {
   Carp::confess "->events called on a logger not logging to self"
     unless $_[0]->{events};
 
   return $_[0]->{events};
 }
+
+
+
+
+
+
 
 
 sub clear_events {
@@ -287,6 +561,27 @@ sub clear_events {
   @{ $_[0]->{events} } = ();
   return;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 sub proxy {
@@ -303,11 +598,56 @@ sub proxy {
 }
 
 
+
+
+
+
+
+
+
+
 sub parent { $_[0] }
 sub logger { $_[0] }
 
 
+
+
+
+
+
+
 sub dispatcher   { $_[0]->{dispatcher} }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 sub is_debug { $_[0]->get_debug }
@@ -324,11 +664,20 @@ use overload
 ;
 
 
+
+
+
+
+
+
+
 1;
 
 __END__
 
 =pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -336,7 +685,7 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 2.008
+version 2.009
 
 =head1 SYNOPSIS
 
@@ -345,7 +694,7 @@ version 2.008
     facility  => 'daemon',
     to_stdout => $opt->{print},
     debug     => $opt->{verbose}
-  })
+  });
 
   $logger->log([ "There are %s items left to purge...", $stuff_left ]);
 
@@ -681,7 +1030,7 @@ Ricardo SIGNES <rjbs@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2013 by Ricardo SIGNES.
+This software is copyright (c) 2014 by Ricardo SIGNES.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
