@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Log::Dispatchouli;
 # ABSTRACT: a simple wrapper around Log::Dispatch
-$Log::Dispatchouli::VERSION = '2.011';
+$Log::Dispatchouli::VERSION = '2.012';
 use Carp ();
 use File::Spec ();
 use Log::Dispatch;
@@ -186,7 +186,7 @@ sub new {
           } else {
             # The time format returned here is subject to change. -- rjbs,
             # 2008-11-21
-            sub { localtime . ' ' . {@_}->{message} . "\n" }
+            sub { (localtime) . ' ' . {@_}->{message} . "\n" }
           }
         },
       )
@@ -695,7 +695,7 @@ Log::Dispatchouli - a simple wrapper around Log::Dispatch
 
 =head1 VERSION
 
-version 2.011
+version 2.012
 
 =head1 SYNOPSIS
 

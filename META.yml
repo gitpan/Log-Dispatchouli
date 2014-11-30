@@ -43,7 +43,7 @@ resources:
   bugtracker: https://github.com/rjbs/Log-Dispatchouli/issues
   homepage: https://github.com/rjbs/Log-Dispatchouli
   repository: https://github.com/rjbs/Log-Dispatchouli.git
-version: '2.011'
+version: '2.012'
 x_Dist_Zilla:
   perl:
     version: '5.021005'
@@ -64,7 +64,7 @@ x_Dist_Zilla:
         Dist::Zilla::Role::Git::Repo:
           repo_root: .
       name: '@RJBS/Git::GatherDir'
-      version: '2.026'
+      version: '2.028'
     -
       class: Dist::Zilla::Plugin::CheckPrereqsIndexed
       name: '@RJBS/CheckPrereqsIndexed'
@@ -161,7 +161,7 @@ x_Dist_Zilla:
         Dist::Zilla::Role::Git::Repo:
           repo_root: .
       name: '@RJBS/Git::NextVersion'
-      version: '2.026'
+      version: '2.028'
     -
       class: Dist::Zilla::Plugin::PkgVersion
       name: '@RJBS/PkgVersion'
@@ -300,7 +300,7 @@ x_Dist_Zilla:
         Dist::Zilla::Role::Git::Repo:
           repo_root: .
       name: '@RJBS/@Git/Check'
-      version: '2.026'
+      version: '2.028'
     -
       class: Dist::Zilla::Plugin::Git::Commit
       config:
@@ -317,21 +317,21 @@ x_Dist_Zilla:
         Dist::Zilla::Role::Git::Repo:
           repo_root: .
       name: '@RJBS/@Git/Commit'
-      version: '2.026'
+      version: '2.028'
     -
       class: Dist::Zilla::Plugin::Git::Tag
       config:
         Dist::Zilla::Plugin::Git::Tag:
           branch: ~
           signed: 0
-          tag: '2.011'
+          tag: '2.012'
           tag_format: '%v'
           tag_message: v%v
           time_zone: local
         Dist::Zilla::Role::Git::Repo:
           repo_root: .
       name: '@RJBS/@Git/Tag'
-      version: '2.026'
+      version: '2.028'
     -
       class: Dist::Zilla::Plugin::Git::Push
       config:
@@ -343,7 +343,7 @@ x_Dist_Zilla:
         Dist::Zilla::Role::Git::Repo:
           repo_root: .
       name: '@RJBS/@Git/Push'
-      version: '2.026'
+      version: '2.028'
     -
       class: Dist::Zilla::Plugin::Prereqs
       config:

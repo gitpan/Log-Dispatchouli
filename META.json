@@ -74,7 +74,7 @@
          "web" : "https://github.com/rjbs/Log-Dispatchouli"
       }
    },
-   "version" : "2.011",
+   "version" : "2.012",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.021005"
@@ -100,7 +100,7 @@
                }
             },
             "name" : "@RJBS/Git::GatherDir",
-            "version" : "2.026"
+            "version" : "2.028"
          },
          {
             "class" : "Dist::Zilla::Plugin::CheckPrereqsIndexed",
@@ -225,7 +225,7 @@
                }
             },
             "name" : "@RJBS/Git::NextVersion",
-            "version" : "2.026"
+            "version" : "2.028"
          },
          {
             "class" : "Dist::Zilla::Plugin::PkgVersion",
@@ -405,7 +405,7 @@
                }
             },
             "name" : "@RJBS/@Git/Check",
-            "version" : "2.026"
+            "version" : "2.028"
          },
          {
             "class" : "Dist::Zilla::Plugin::Git::Commit",
@@ -428,7 +428,7 @@
                }
             },
             "name" : "@RJBS/@Git/Commit",
-            "version" : "2.026"
+            "version" : "2.028"
          },
          {
             "class" : "Dist::Zilla::Plugin::Git::Tag",
@@ -436,7 +436,7 @@
                "Dist::Zilla::Plugin::Git::Tag" : {
                   "branch" : null,
                   "signed" : 0,
-                  "tag" : "2.011",
+                  "tag" : "2.012",
                   "tag_format" : "%v",
                   "tag_message" : "v%v",
                   "time_zone" : "local"
@@ -446,7 +446,7 @@
                }
             },
             "name" : "@RJBS/@Git/Tag",
-            "version" : "2.026"
+            "version" : "2.028"
          },
          {
             "class" : "Dist::Zilla::Plugin::Git::Push",
@@ -463,7 +463,7 @@
                }
             },
             "name" : "@RJBS/@Git/Push",
-            "version" : "2.026"
+            "version" : "2.028"
          },
          {
             "class" : "Dist::Zilla::Plugin::Prereqs",
